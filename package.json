@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
     "fix:prettier": "prettier --write .",
     "fix:eslint": "eslint --fix",
     "lint:prettier": "prettier --check .",
