@@ -23,5 +23,8 @@
   "volta": {
     "node": "16.13.0",
     "yarn": "1.22.17"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.8.1"
   }
 }
