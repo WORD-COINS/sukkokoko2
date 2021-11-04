@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc",
     "fix:prettier": "prettier --write .",
-    "fix:eslint": "eslint --fix",
+    "fix:eslint": "eslint --fix .",
     "lint:prettier": "prettier --check .",
-    "lint:eslint": "eslint"
+    "lint:eslint": "eslint ."
   },
   "author": "",
   "license": "MIT",
