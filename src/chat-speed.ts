@@ -38,14 +38,29 @@ const getAllChannelsNumberOfPost = async (
     await client.conversations.list({
       limit: 500,
     })
-  ).channels!;
+  ).channels;
+  if (channels == null) {
+    throw new Error("channels couldn't be get");
+  }
+
   const channelsInfoWithNumberOfPost = [];
 
   const botInfo = await utils.getBotInfo(client, token, botName);
-  const botId = botInfo!.id!;
+  if (botInfo == null) {
+    throw new Error("botInfo couldn't be get");
+  }
+
+  const botId = botInfo.id;
+  if (botId == null) {
+    throw new Error("botId couldn't be get");
+  }
+
   // conversationsをforEachで回したらクロージャ内でオブジェクトが破棄されて厳しくなったので普通のfor文で書いてます
   for (let i = 0; i < Object.keys(channels).length; i++) {
-    const channelId = channels[i].id! as ChannelID;
+    const channelId = channels[i].id as ChannelID | undefined;
+    if (channelId == null) {
+      throw new Error("channeId couldn't be get");
+    }
 
     // もしボットが入っていないパブリックチャンネルがあったら参加する
     if ((await utils.isBotJoined(client, token, channelId, botId)) === false) {
@@ -60,7 +75,7 @@ const getAllChannelsNumberOfPost = async (
     channelsInfoWithNumberOfPost.push(channelWithNumberOfPost);
   }
 
-  return channelsInfoWithNumberOfPost.sort(function (a, b) {
+  return channelsInfoWithNumberOfPost.sort((a, b) => {
     return b.numberOfPost - a.numberOfPost;
   });
 };

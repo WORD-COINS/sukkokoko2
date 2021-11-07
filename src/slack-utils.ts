@@ -13,13 +13,20 @@ export const getChannelInformation = async (
 
   const channelIdMap = new Map<ChannelID, Channel>(); // channel情報をIDで引けるようにしたマップ
   channels?.forEach((channel) => {
-    const id = channel.id! as ChannelID;
+    const id = channel.id as ChannelID | undefined;
+    if (id == null) {
+      throw new Error("channelId couldn't be get");
+    }
     channelIdMap.set(id, channel);
   });
 
   const channelNameMap = new Map<ChannelName, Channel>(); // channel情報をnameで引けるようにしたマップ
   channels?.forEach((channel) => {
-    const name = channel.name! as ChannelName;
+    const name = channel.name as ChannelName | undefined;
+    if (name == null) {
+      throw new Error("channelName could'nt be get");
+    }
+
     channelNameMap.set(name, channel);
   });
 

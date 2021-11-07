@@ -37,13 +37,16 @@ const main = async (env: Env) => {
     signingSecret,
   });
 
-  const [_, channelNameMap] = await utils.getChannelInformation(app.client);
+  const [, channelNameMap] = await utils.getChannelInformation(app.client);
 
   const channel = channelNameMap.get(channelName as ChannelName);
   if (channel == null) {
     throw new Error("Not found post channel");
   }
-  const channelId = channel.id! as ChannelID;
+  const channelId = channel.id as ChannelID | undefined;
+  if (channelId == null) {
+    throw new Error("channelId couldn't be get");
+  }
 
   chatspeed.postChatSpeed(app.client, token, channelId, env.botName);
 
