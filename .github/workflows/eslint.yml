@@ -1,4 +1,4 @@
-name: Check workflows
+name: ESLint
 
 on:
   push:
