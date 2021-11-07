@@ -1,19 +1,14 @@
 import { App } from "@slack/bolt";
-import * as utils from "./slack-utils";
+import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed";
 import { ChannelID, ChannelName } from "./types";
+import { validateNonNullableObject } from "./utils";
 
 type Env = {
   token: string;
   signingSecret: string;
   channelName: string;
   botName: string;
-};
-
-const validateNonNullableObject = <T>(
-  obj: T
-): obj is { [P in keyof T]: NonNullable<T[P]> } => {
-  return !Object.values(obj).every((v) => v != null);
 };
 
 const getEnv = (): Env => {
@@ -37,7 +32,7 @@ const main = async (env: Env) => {
     signingSecret,
   });
 
-  const [, channelNameMap] = await utils.getChannelInformation(app.client);
+  const [, channelNameMap] = await slackUtils.getChannelInformation(app.client);
 
   const channel = channelNameMap.get(channelName as ChannelName);
   if (channel == null) {
