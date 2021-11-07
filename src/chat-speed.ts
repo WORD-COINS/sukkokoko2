@@ -31,7 +31,9 @@ const getNumberOfDayPost = async (
 // 全てのチャンネルの情報と流速のペアをソートして返す
 const getAllChannelsNumberOfPost = async (
   client: WebClient,
-  token: string,
+  slackBotToken: string,
+  slackUserToken: string,
+  signingSecret: string,
   botName: string
 ) => {
   const channels = (
@@ -43,9 +45,7 @@ const getAllChannelsNumberOfPost = async (
     throw new Error("channels couldn't be get");
   }
 
-  const channelsInfoWithNumberOfPost = [];
-
-  const botInfo = await utils.getBotInfo(client, token, botName);
+  const botInfo = await utils.getBotInfo(client, slackBotToken, botName);
   if (botInfo == null) {
     throw new Error("botInfo couldn't be get");
   }
@@ -56,20 +56,31 @@ const getAllChannelsNumberOfPost = async (
   }
 
   // conversationsをforEachで回したらクロージャ内でオブジェクトが破棄されて厳しくなったので普通のfor文で書いてます
+  const channelsInfoWithNumberOfPost = [];
   for (let i = 0; i < Object.keys(channels).length; i++) {
     const channelId = channels[i].id as ChannelID | undefined;
     if (channelId == null) {
       throw new Error("channeId couldn't be get");
     }
 
+    if (channels[i].is_archived) {
+      console.log(`${channels[i].name} has been archived`);
+      continue;
+    }
+
     // もしボットが入っていないパブリックチャンネルがあったら参加する
-    if ((await utils.isBotJoined(client, token, channelId, botId)) === false) {
-      await utils.inviteChannel(channelId, botId);
+    if (!channels[i].is_member) {
+      console.log(`invite bot to ${channels[i].name}`);
+      await utils.inviteChannel(channelId, botId, slackUserToken, signingSecret);
     }
 
     // チャンネルの投稿数を集計してchannelsInfoWithNumberOfPostにpushする
-    const channelObject = await getNumberOfDayPost(client, token, channelId);
-    if (channelObject === undefined) continue;
+    const channelObject = await getNumberOfDayPost(
+      client,
+      slackBotToken,
+      channelId
+    );
+    if (channelObject.numberOfPost === 0) continue;
     const numberOfPost = channelObject.numberOfPost;
     const channelWithNumberOfPost = { channel: channels[i], numberOfPost };
     channelsInfoWithNumberOfPost.push(channelWithNumberOfPost);
@@ -83,22 +94,33 @@ const getAllChannelsNumberOfPost = async (
 // 過去24時間の流速をchannelに投稿
 export const postChatSpeed = async (
   client: WebClient,
-  token: string,
+  slackBotToken: string,
   channel: ChannelID,
+  slackUserToken: string,
+  signingSecret: string,
   botName: string
 ) => {
-  const channelArray = await getAllChannelsNumberOfPost(client, token, botName);
+  console.log("aggregate chat speed");
+  const channelArray = await getAllChannelsNumberOfPost(
+    client,
+    slackBotToken,
+    slackUserToken,
+    signingSecret,
+    botName
+  );
 
+  console.log("make message");
   let text = "*⏱本日の 流速強さ ランキング (575)🏃‍♂️🏃‍♂️🏃‍♂️*\n";
   for (let i = 0; i < channelArray.length; i++) {
     const s = `<#${channelArray[i].channel.id}>:\t${channelArray[i].numberOfPost}\n`;
     text += s;
   }
+  console.log(text);
 
+  console.log("post chat speed log");
   await client.chat.postMessage({
-    token,
+    slackBotToken,
     channel,
     text,
   });
-  console.log("post chat speed log");
 };

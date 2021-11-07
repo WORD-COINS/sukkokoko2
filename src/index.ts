@@ -7,6 +7,7 @@ import { validateNonNullableObject } from "./utils";
 type Env = {
   token: string;
   signingSecret: string;
+  userToken: string;
   channelName: string;
   botName: string;
 };
@@ -14,10 +15,11 @@ type Env = {
 const getEnv = (): Env => {
   const token = process.env.SLACK_BOT_TOKEN;
   const signingSecret = process.env.SLACK_SIGNING_SECRET;
+  const userToken = process.env.SLACK_USER_TOKEN;
   const channelName = process.env.CHANNEL_NAME;
   const botName = process.env.BOT_NAME;
 
-  const env = { token, signingSecret, channelName, botName };
+  const env = { token, signingSecret, userToken, channelName, botName };
   if (!validateNonNullableObject(env)) {
     throw new Error("Not found some environment variables.");
   }
@@ -25,7 +27,7 @@ const getEnv = (): Env => {
 };
 
 const main = async (env: Env) => {
-  const { token, signingSecret, channelName } = env;
+  const { token, signingSecret, userToken, channelName, botName } = env;
 
   const app = new App({
     token,
@@ -43,9 +45,14 @@ const main = async (env: Env) => {
     throw new Error("channelId couldn't be get");
   }
 
-  chatspeed.postChatSpeed(app.client, token, channelId, env.botName);
-
-  console.log("⚡️ Bolt app is running!");
+  await chatspeed.postChatSpeed(
+    app.client,
+    token,
+    channelId,
+    userToken,
+    signingSecret,
+    botName
+  );
 };
 
 main(getEnv());
