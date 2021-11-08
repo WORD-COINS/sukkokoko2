@@ -1,10 +1,11 @@
 import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
-import * as chatspeed from "./chat-speed";
+import * as chatspeed from "./chat-speed-aggregation";
 import { ChannelID, ChannelName } from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
+import { buildMessage } from "./message";
 
 type Env = {
   token: string;
@@ -119,7 +120,18 @@ const main = async (env: Env) => {
     signingSecret
   );
 
-  await chatspeed.postChatSpeed(botClient, postTargetChannelId, channels);
+  console.log("aggregate chat speed");
+  const results = await chatspeed.aggregateNumberOfPost(botClient, channels);
+
+  console.log("make message");
+  const text = buildMessage(results);
+  console.log(text);
+
+  console.log("post chat speed log");
+  await botClient.chat.postMessage({
+    channel: postTargetChannelId,
+    text,
+  });
 };
 
 main(getEnv());

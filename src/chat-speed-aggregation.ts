@@ -1,7 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import * as utils from "./slack-utils";
-import type { ChannelID } from "./types";
+import type { ChatSpeedAggregationResult, ChannelID } from "./types";
 
 // IDで指定されたchannelの24時間以内のpost数を集計する
 const getNumberOfDayPost = async (client: WebClient, channel: ChannelID) => {
@@ -25,10 +25,10 @@ const getNumberOfDayPost = async (client: WebClient, channel: ChannelID) => {
 };
 
 // 全てのチャンネルのIDと流速のペアをソートして返す
-const aggregateNumberOfPost = async (
+export const aggregateNumberOfPost = async (
   client: WebClient,
   channels: Promise<Channel>[]
-) => {
+): Promise<ChatSpeedAggregationResult[]> => {
   const numberOfPostPromises = channels.map(async (channel) =>
     getNumberOfDayPost(client, utils.getChannelId(await channel))
   );
@@ -40,26 +40,4 @@ const aggregateNumberOfPost = async (
     .sort((a, b) => {
       return b.numberOfPost - a.numberOfPost;
     });
-};
-
-// 過去24時間の流速をchannelに投稿
-export const postChatSpeed = async (
-  client: WebClient,
-  channel: ChannelID,
-  channels: Promise<Channel>[]
-) => {
-  console.log("aggregate chat speed");
-  const results = await aggregateNumberOfPost(client, channels);
-
-  console.log("make message");
-  const text =
-    "*⏱本日の 流速強さ ランキング (575)🏃‍♂️🏃‍♂️🏃‍♂️*\n" +
-    results.map((result) => `<#${result.channel}>:\t${result.numberOfPost}\n`);
-  console.log(text);
-
-  console.log("post chat speed log");
-  await client.chat.postMessage({
-    channel,
-    text,
-  });
 };
