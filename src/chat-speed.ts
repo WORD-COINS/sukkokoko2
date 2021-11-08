@@ -1,4 +1,5 @@
 import { WebClient } from "@slack/web-api";
+import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import * as utils from "./slack-utils";
 import type { ChannelID } from "./types";
 
@@ -26,49 +27,9 @@ const getNumberOfDayPost = async (client: WebClient, channel: ChannelID) => {
 // 全てのチャンネルのIDと流速のペアをソートして返す
 const getAllChannelsNumberOfPost = async (
   client: WebClient,
-  slackUserToken: string,
-  signingSecret: string,
-  botName: string
+  channels: Promise<Channel>[]
 ) => {
-  const channels = (
-    await client.conversations.list({
-      limit: 500,
-    })
-  ).channels;
-  if (channels == null) {
-    throw new Error("channels couldn't be get");
-  }
-
-  const botInfo = await utils.getBotInfo(client, botName);
-  if (botInfo == null) {
-    throw new Error("botInfo couldn't be get");
-  }
-
-  const botId = botInfo.id;
-  if (botId == null) {
-    throw new Error("botId couldn't be get");
-  }
-
-  const channelsWithoutArchived = channels.filter(
-    (channel) => !channel.is_archived
-  );
-
-  // もしボットが入っていないパブリックチャンネルがあったら参加する
-  const joinedChannels = channelsWithoutArchived.map(async (channel) => {
-    if (!channel.is_member) {
-      console.log(`invite bot to ${channel.name}`);
-      await utils.inviteChannel(
-        utils.getChannelId(channel),
-        botId,
-        slackUserToken,
-        signingSecret
-      );
-    }
-
-    return channel;
-  });
-
-  const numberOfPostPromises = joinedChannels.map(async (channel) =>
+  const numberOfPostPromises = channels.map(async (channel) =>
     getNumberOfDayPost(client, utils.getChannelId(await channel))
   );
 
@@ -85,16 +46,12 @@ const getAllChannelsNumberOfPost = async (
 export const postChatSpeed = async (
   client: WebClient,
   channel: ChannelID,
-  slackUserToken: string,
-  signingSecret: string,
-  botName: string
+  channels: Promise<Channel>[]
 ) => {
   console.log("aggregate chat speed");
   const channelArray = await getAllChannelsNumberOfPost(
     client,
-    slackUserToken,
-    signingSecret,
-    botName
+    channels
   );
 
   console.log("make message");

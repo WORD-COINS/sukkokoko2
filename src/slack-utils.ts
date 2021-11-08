@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
-import { Channel } from "@slack/web-api/dist/response/AdminUsergroupsListChannelsResponse";
+import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { ChannelID, ChannelName } from "./types";
 
 // channel情報をマップにして返す関数

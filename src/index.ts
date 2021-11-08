@@ -29,14 +29,15 @@ const getEnv = (): Env => {
 const main = async (env: Env) => {
   const { token, signingSecret, userToken, channelName, botName } = env;
 
-  const app = new App({
+  const botApp = new App({
     token,
     signingSecret,
   });
+  const botClient =  botApp.client;
 
-  const channelId = await (async () => {
+  const postTargetChannelId = await (async () => {
     const [, channelNameMap] = await slackUtils.getChannelInformation(
-      app.client
+      botClient
     );
 
     const channel = channelNameMap.get(channelName as ChannelName);
@@ -51,12 +52,50 @@ const main = async (env: Env) => {
     return channelId;
   })();
 
+  const channels = await (async () => {
+    const channels = (
+      await botClient.conversations.list({
+        limit: 500,
+      })
+    ).channels;
+    if (channels == null) {
+      throw new Error("channels couldn't be get");
+    }
+
+    const botInfo = await slackUtils.getBotInfo(botClient, botName);
+    if (botInfo == null) {
+      throw new Error("botInfo couldn't be get");
+    }
+
+    const botId = botInfo.id;
+    if (botId == null) {
+      throw new Error("botId couldn't be get");
+    }
+
+    const channelsWithoutArchived = channels.filter(
+      (channel) => !channel.is_archived
+    );
+
+    // もしボットが入っていないパブリックチャンネルがあったら参加する
+    return channelsWithoutArchived.map(async (channel) => {
+      if (!channel.is_member) {
+        console.log(`invite bot to ${channel.name}`);
+        await slackUtils.inviteChannel(
+          slackUtils.getChannelId(channel),
+          botId,
+          userToken,
+          signingSecret
+        );
+      }
+
+      return channel;
+    });
+  })();
+
   await chatspeed.postChatSpeed(
-    app.client,
-    channelId,
-    userToken,
-    signingSecret,
-    botName
+    botClient,
+    postTargetChannelId,
+    channels
   );
 };
 
