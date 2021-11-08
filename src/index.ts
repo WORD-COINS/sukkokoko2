@@ -72,13 +72,13 @@ const getAllChannels = async (botClient: WebClient) => {
   return channels;
 };
 
+// もしボットが入っていないパブリックチャンネルがあったら参加する
 const joinToNotInChannels = async (
   channels: Channel[],
   botId: string,
   userToken: string,
   signingSecret: string
 ) => {
-  // もしボットが入っていないパブリックチャンネルがあったら参加する
   return channels.map(async (channel) => {
     if (!channel.is_member) {
       console.log(`invite bot to ${channel.name}`);
