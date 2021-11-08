@@ -34,16 +34,22 @@ const main = async (env: Env) => {
     signingSecret,
   });
 
-  const [, channelNameMap] = await slackUtils.getChannelInformation(app.client);
+  const channelId = await (async () => {
+    const [, channelNameMap] = await slackUtils.getChannelInformation(
+      app.client
+    );
 
-  const channel = channelNameMap.get(channelName as ChannelName);
-  if (channel == null) {
-    throw new Error("Not found post channel");
-  }
-  const channelId = channel.id as ChannelID | undefined;
-  if (channelId == null) {
-    throw new Error("channelId couldn't be get");
-  }
+    const channel = channelNameMap.get(channelName as ChannelName);
+    if (channel == null) {
+      throw new Error("Not found post channel");
+    }
+    const channelId = channel.id as ChannelID | undefined;
+    if (channelId == null) {
+      throw new Error("channelId couldn't be get");
+    }
+
+    return channelId;
+  })();
 
   await chatspeed.postChatSpeed(
     app.client,
