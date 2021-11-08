@@ -1,8 +1,10 @@
 import { App } from "@slack/bolt";
+import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed";
 import { ChannelID, ChannelName } from "./types";
 import { validateNonNullableObject } from "./utils";
+import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 
 type Env = {
   token: string;
@@ -26,6 +28,72 @@ const getEnv = (): Env => {
   return env;
 };
 
+const getChannelIdFromChannelName = async (
+  client: WebClient,
+  channelName: ChannelName
+) => {
+  const [, channelNameMap] = await slackUtils.getChannelInformation(client);
+
+  const channel = channelNameMap.get(channelName);
+  if (channel == null) {
+    throw new Error("Not found post channel");
+  }
+  const channelId = channel.id as ChannelID | undefined;
+  if (channelId == null) {
+    throw new Error("channelId couldn't be get");
+  }
+
+  return channelId;
+};
+
+const getBotIdFromBotName = async (botClient: WebClient, botName: string) => {
+  const botInfo = await slackUtils.getBotInfo(botClient, botName);
+  if (botInfo == null) {
+    throw new Error("botInfo couldn't be get");
+  }
+
+  const botId = botInfo.id;
+  if (botId == null) {
+    throw new Error("botId couldn't be get");
+  }
+
+  return botId;
+};
+
+const getAllChannels = async (botClient: WebClient) => {
+  const channels = (
+    await botClient.conversations.list({
+      limit: 500,
+    })
+  ).channels;
+  if (channels == null) {
+    throw new Error("channels couldn't be get");
+  }
+  return channels;
+};
+
+const joinToNotInChannels = async (
+  channels: Channel[],
+  botId: string,
+  userToken: string,
+  signingSecret: string
+) => {
+  // もしボットが入っていないパブリックチャンネルがあったら参加する
+  return channels.map(async (channel) => {
+    if (!channel.is_member) {
+      console.log(`invite bot to ${channel.name}`);
+      await slackUtils.inviteChannel(
+        slackUtils.getChannelId(channel),
+        botId,
+        userToken,
+        signingSecret
+      );
+    }
+
+    return channel;
+  });
+};
+
 const main = async (env: Env) => {
   const { token, signingSecret, userToken, channelName, botName } = env;
 
@@ -33,70 +101,25 @@ const main = async (env: Env) => {
     token,
     signingSecret,
   });
-  const botClient =  botApp.client;
+  const botClient = botApp.client;
 
-  const postTargetChannelId = await (async () => {
-    const [, channelNameMap] = await slackUtils.getChannelInformation(
-      botClient
-    );
-
-    const channel = channelNameMap.get(channelName as ChannelName);
-    if (channel == null) {
-      throw new Error("Not found post channel");
-    }
-    const channelId = channel.id as ChannelID | undefined;
-    if (channelId == null) {
-      throw new Error("channelId couldn't be get");
-    }
-
-    return channelId;
-  })();
-
-  const channels = await (async () => {
-    const channels = (
-      await botClient.conversations.list({
-        limit: 500,
-      })
-    ).channels;
-    if (channels == null) {
-      throw new Error("channels couldn't be get");
-    }
-
-    const botInfo = await slackUtils.getBotInfo(botClient, botName);
-    if (botInfo == null) {
-      throw new Error("botInfo couldn't be get");
-    }
-
-    const botId = botInfo.id;
-    if (botId == null) {
-      throw new Error("botId couldn't be get");
-    }
-
-    const channelsWithoutArchived = channels.filter(
-      (channel) => !channel.is_archived
-    );
-
-    // もしボットが入っていないパブリックチャンネルがあったら参加する
-    return channelsWithoutArchived.map(async (channel) => {
-      if (!channel.is_member) {
-        console.log(`invite bot to ${channel.name}`);
-        await slackUtils.inviteChannel(
-          slackUtils.getChannelId(channel),
-          botId,
-          userToken,
-          signingSecret
-        );
-      }
-
-      return channel;
-    });
-  })();
-
-  await chatspeed.postChatSpeed(
+  const postTargetChannelId = await getChannelIdFromChannelName(
     botClient,
-    postTargetChannelId,
-    channels
+    channelName as ChannelName
   );
+  const botId = await getBotIdFromBotName(botClient, botName);
+  const allChannels = await getAllChannels(botClient);
+  const channelsWithoutArchived = allChannels.filter(
+    (channel) => !channel.is_archived
+  );
+  const channels = await joinToNotInChannels(
+    channelsWithoutArchived,
+    botId,
+    userToken,
+    signingSecret
+  );
+
+  await chatspeed.postChatSpeed(botClient, postTargetChannelId, channels);
 };
 
 main(getEnv());

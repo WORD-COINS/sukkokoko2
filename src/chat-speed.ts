@@ -25,7 +25,7 @@ const getNumberOfDayPost = async (client: WebClient, channel: ChannelID) => {
 };
 
 // 全てのチャンネルのIDと流速のペアをソートして返す
-const getAllChannelsNumberOfPost = async (
+const aggregateNumberOfPost = async (
   client: WebClient,
   channels: Promise<Channel>[]
 ) => {
@@ -49,17 +49,12 @@ export const postChatSpeed = async (
   channels: Promise<Channel>[]
 ) => {
   console.log("aggregate chat speed");
-  const channelArray = await getAllChannelsNumberOfPost(
-    client,
-    channels
-  );
+  const results = await aggregateNumberOfPost(client, channels);
 
   console.log("make message");
-  let text = "*⏱本日の 流速強さ ランキング (575)🏃‍♂️🏃‍♂️🏃‍♂️*\n";
-  for (let i = 0; i < channelArray.length; i++) {
-    const s = `<#${channelArray[i].channel}>:\t${channelArray[i].numberOfPost}\n`;
-    text += s;
-  }
+  const text =
+    "*⏱本日の 流速強さ ランキング (575)🏃‍♂️🏃‍♂️🏃‍♂️*\n" +
+    results.map((result) => `<#${result.channel}>:\t${result.numberOfPost}\n`);
   console.log(text);
 
   console.log("post chat speed log");
