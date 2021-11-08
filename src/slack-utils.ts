@@ -51,12 +51,8 @@ export const inviteChannel = async (
 };
 
 // ボットの情報を取ってくる関数
-export const getBotInfo = async (
-  client: WebClient,
-  token: string,
-  botName: string
-) => {
-  const usersList = await client.users.list({ token });
+export const getBotInfo = async (client: WebClient, botName: string) => {
+  const usersList = await client.users.list();
   if (usersList.members == null) {
     return undefined;
   }
@@ -67,4 +63,12 @@ export const getBotInfo = async (
     }
   }
   return undefined;
+};
+
+export const getChannelId = (channel: Channel): ChannelID => {
+  const channelId = channel.id as ChannelID | undefined;
+  if (channelId == null) {
+    throw new Error("channelId couldn't be get");
+  }
+  return channelId;
 };

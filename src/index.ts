@@ -47,7 +47,6 @@ const main = async (env: Env) => {
 
   await chatspeed.postChatSpeed(
     app.client,
-    token,
     channelId,
     userToken,
     signingSecret,
