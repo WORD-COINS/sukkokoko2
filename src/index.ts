@@ -1,7 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
-import { ChannelID, ChannelName } from "./types";
+import { BotID, BotName, ChannelID, ChannelName } from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { buildMessage } from "./message";
@@ -29,7 +29,7 @@ const getEnv = (): Env => {
 const getChannelIdFromChannelName = async (
   client: WebClient,
   channelName: ChannelName
-) => {
+): Promise<ChannelID> => {
   const [, channelNameMap] = await slackUtils.getChannelInformation(client);
 
   const channel = channelNameMap.get(channelName);
@@ -44,13 +44,16 @@ const getChannelIdFromChannelName = async (
   return channelId;
 };
 
-const getBotIdFromBotName = async (botClient: WebClient, botName: string) => {
+const getBotIdFromBotName = async (
+  botClient: WebClient,
+  botName: BotName
+): Promise<BotID> => {
   const botInfo = await slackUtils.getBotInfo(botClient, botName);
   if (botInfo == null) {
     throw new Error("botInfo couldn't be get");
   }
 
-  const botId = botInfo.id;
+  const botId = botInfo.id as BotID | undefined;
   if (botId == null) {
     throw new Error("botId couldn't be get");
   }
@@ -74,7 +77,7 @@ const getAllChannels = async (botClient: WebClient) => {
 const joinToNotInChannels = async (
   client: WebClient,
   channels: Channel[],
-  botId: string
+  botId: BotID
 ) => {
   return channels.map(async (channel) => {
     if (!channel.is_member) {
@@ -100,7 +103,7 @@ const main = async (env: Env) => {
     botClient,
     channelName as ChannelName
   );
-  const botId = await getBotIdFromBotName(botClient, botName);
+  const botId = await getBotIdFromBotName(botClient, botName as BotName);
   const allChannels = await getAllChannels(botClient);
   const channelsWithoutArchived = allChannels.filter(
     (channel) => !channel.is_archived
