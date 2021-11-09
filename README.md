@@ -6,7 +6,6 @@
 
 1. 以下の環境変数をセットする
    ```sh
-   SLACK_SIGNING_SECRET
    SLACK_BOT_TOKEN
    SLACK_USER_TOKEN
    CHANNEL_NAME

@@ -8,21 +8,19 @@ import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse"
 import { buildMessage } from "./message";
 
 type Env = {
-  token: string;
-  signingSecret: string;
+  botToken: string;
   userToken: string;
   channelName: string;
   botName: string;
 };
 
 const getEnv = (): Env => {
-  const token = process.env.SLACK_BOT_TOKEN;
-  const signingSecret = process.env.SLACK_SIGNING_SECRET;
+  const botToken = process.env.SLACK_BOT_TOKEN;
   const userToken = process.env.SLACK_USER_TOKEN;
   const channelName = process.env.CHANNEL_NAME;
   const botName = process.env.BOT_NAME;
 
-  const env = { token, signingSecret, userToken, channelName, botName };
+  const env = { botToken, userToken, channelName, botName };
   if (!validateNonNullableObject(env)) {
     throw new Error("Not found some environment variables.");
   }
@@ -94,19 +92,10 @@ const joinToNotInChannels = async (
 };
 
 const main = async (env: Env) => {
-  const { token, signingSecret, userToken, channelName, botName } = env;
+  const { botToken, userToken, channelName, botName } = env;
 
-  const botApp = new App({
-    token,
-    signingSecret,
-  });
-  const botClient = botApp.client;
-
-  const userApp = new App({
-    token: userToken,
-    signingSecret,
-  });
-  const userClient = userApp.client;
+  const botClient = new WebClient(botToken);
+  const userClient = new WebClient(userToken);
 
   const postTargetChannelId = await getChannelIdFromChannelName(
     botClient,
