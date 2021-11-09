@@ -75,19 +75,17 @@ const getAllChannels = async (botClient: WebClient) => {
 
 // もしボットが入っていないパブリックチャンネルがあったら参加する
 const joinToNotInChannels = async (
+  client: WebClient,
   channels: Channel[],
-  botId: string,
-  userToken: string,
-  signingSecret: string
+  botId: string
 ) => {
   return channels.map(async (channel) => {
     if (!channel.is_member) {
       console.log(`invite bot to ${channel.name}`);
       await slackUtils.inviteChannel(
+        client,
         slackUtils.getChannelId(channel),
-        botId,
-        userToken,
-        signingSecret
+        botId
       );
     }
 
@@ -104,6 +102,12 @@ const main = async (env: Env) => {
   });
   const botClient = botApp.client;
 
+  const userApp = new App({
+    token: userToken,
+    signingSecret,
+  });
+  const userClient = userApp.client;
+
   const postTargetChannelId = await getChannelIdFromChannelName(
     botClient,
     channelName as ChannelName
@@ -114,10 +118,9 @@ const main = async (env: Env) => {
     (channel) => !channel.is_archived
   );
   const channels = await joinToNotInChannels(
+    userClient,
     channelsWithoutArchived,
-    botId,
-    userToken,
-    signingSecret
+    botId
   );
 
   console.log("aggregate chat speed");
