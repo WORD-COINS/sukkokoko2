@@ -1,4 +1,3 @@
-import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
