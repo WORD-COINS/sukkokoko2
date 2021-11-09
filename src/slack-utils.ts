@@ -1,4 +1,3 @@
-import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { ChannelID, ChannelName } from "./types";
