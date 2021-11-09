@@ -1,6 +1,5 @@
-import { App } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
-import { Channel } from "@slack/web-api/dist/response/AdminUsergroupsListChannelsResponse";
+import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { ChannelID, ChannelName } from "./types";
 
 // channel情報をマップにして返す関数
@@ -34,17 +33,11 @@ export const getChannelInformation = async (
 
 // 主にbotをchannel IDにinviteする関数
 export const inviteChannel = async (
+  client: WebClient,
   channel: ChannelID,
-  users: string,
-  slackUserToken: string,
-  signingSecret: string
+  users: string
 ) => {
-  const appUser = new App({
-    token: slackUserToken,
-    signingSecret,
-  });
-  await appUser.client.conversations.invite({
-    token: slackUserToken,
+  await client.conversations.invite({
     users,
     channel,
   });
