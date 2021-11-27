@@ -1,7 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
-import { ChannelID, ChannelName } from "./types";
+import { BotID, BotName, ChannelID, ChannelName } from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { buildMessage } from "./message";
@@ -29,7 +29,7 @@ const getEnv = (): Env => {
 const getChannelIdFromChannelName = async (
   client: WebClient,
   channelName: ChannelName
-) => {
+): Promise<ChannelID> => {
   const [, channelNameMap] = await slackUtils.getChannelInformation(client);
 
   const channel = channelNameMap.get(channelName);
@@ -44,13 +44,16 @@ const getChannelIdFromChannelName = async (
   return channelId;
 };
 
-const getBotIdFromBotName = async (botClient: WebClient, botName: string) => {
+const getBotIdFromBotName = async (
+  botClient: WebClient,
+  botName: BotName
+): Promise<BotID> => {
   const botInfo = await slackUtils.getBotInfo(botClient, botName);
   if (botInfo == null) {
     throw new Error("botInfo couldn't be get");
   }
 
-  const botId = botInfo.id;
+  const botId = botInfo.id as BotID | undefined;
   if (botId == null) {
     throw new Error("botId couldn't be get");
   }
@@ -58,7 +61,7 @@ const getBotIdFromBotName = async (botClient: WebClient, botName: string) => {
   return botId;
 };
 
-const getAllChannels = async (botClient: WebClient) => {
+const getAllChannels = async (botClient: WebClient): Promise<Channel[]> => {
   const channels = (
     await botClient.conversations.list({
       limit: 500,
@@ -71,11 +74,11 @@ const getAllChannels = async (botClient: WebClient) => {
 };
 
 // もしボットが入っていないパブリックチャンネルがあったら参加する
-const joinToNotInChannels = async (
+const joinToNotInChannels = (
   client: WebClient,
   channels: Channel[],
-  botId: string
-) => {
+  botId: BotID
+): Promise<Channel>[] => {
   return channels.map(async (channel) => {
     if (!channel.is_member) {
       console.log(`invite bot to ${channel.name}`);
@@ -90,7 +93,7 @@ const joinToNotInChannels = async (
   });
 };
 
-const main = async (env: Env) => {
+const main = async (env: Env): Promise<void> => {
   const { botToken, userToken, channelName, botName } = env;
 
   const botClient = new WebClient(botToken);
@@ -100,7 +103,7 @@ const main = async (env: Env) => {
     botClient,
     channelName as ChannelName
   );
-  const botId = await getBotIdFromBotName(botClient, botName);
+  const botId = await getBotIdFromBotName(botClient, botName as BotName);
   const allChannels = await getAllChannels(botClient);
   const channelsWithoutArchived = allChannels.filter(
     (channel) => !channel.is_archived
