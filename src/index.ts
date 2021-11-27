@@ -115,7 +115,15 @@ const main = async (env: Env): Promise<void> => {
   );
 
   console.log("aggregate chat speed");
-  const results = await chatspeed.aggregateNumberOfPost(botClient, channels);
+  const numberOfPostPromises = channels
+    .map(async (channel) => slackUtils.getChannelId(await channel))
+    .map(async (id) => chatspeed.aggregateNumberOfPost(botClient, await id));
+  const numberOfPost = await Promise.all(numberOfPostPromises);
+  const results = numberOfPost
+    .filter((channelObject) => channelObject.numberOfPost !== 0)
+    .sort((a, b) => {
+      return b.numberOfPost - a.numberOfPost;
+    });
 
   console.log("make message");
   const text = buildMessage(results);
