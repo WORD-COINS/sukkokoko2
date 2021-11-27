@@ -1,12 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
-import {
-  BotID,
-  BotName,
-  ChannelID,
-  ChannelName,
-} from "./types";
+import { BotID, BotName, ChannelID, ChannelName } from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { buildMessage } from "./message";
