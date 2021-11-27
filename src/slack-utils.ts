@@ -1,5 +1,6 @@
 import { WebClient } from "@slack/web-api";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
+import { Member } from "@slack/web-api/dist/response/UsersListResponse";
 import { ChannelID, ChannelName } from "./types";
 
 // channel情報をマップにして返す関数
@@ -36,7 +37,7 @@ export const inviteChannel = async (
   client: WebClient,
   channel: ChannelID,
   users: string
-) => {
+): Promise<void> => {
   await client.conversations.invite({
     users,
     channel,
@@ -44,7 +45,10 @@ export const inviteChannel = async (
 };
 
 // ボットの情報を取ってくる関数
-export const getBotInfo = async (client: WebClient, botName: string) => {
+export const getBotInfo = async (
+  client: WebClient,
+  botName: string
+): Promise<Member | undefined> => {
   const usersList = await client.users.list();
   if (usersList.members == null) {
     return undefined;
