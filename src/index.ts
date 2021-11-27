@@ -61,7 +61,7 @@ const getBotIdFromBotName = async (
   return botId;
 };
 
-const getAllChannels = async (botClient: WebClient) => {
+const getAllChannels = async (botClient: WebClient): Promise<Channel[]> => {
   const channels = (
     await botClient.conversations.list({
       limit: 500,
@@ -74,11 +74,11 @@ const getAllChannels = async (botClient: WebClient) => {
 };
 
 // もしボットが入っていないパブリックチャンネルがあったら参加する
-const joinToNotInChannels = async (
+const joinToNotInChannels = (
   client: WebClient,
   channels: Channel[],
   botId: BotID
-) => {
+): Promise<Channel>[] => {
   return channels.map(async (channel) => {
     if (!channel.is_member) {
       console.log(`invite bot to ${channel.name}`);
@@ -93,7 +93,7 @@ const joinToNotInChannels = async (
   });
 };
 
-const main = async (env: Env) => {
+const main = async (env: Env): Promise<void> => {
   const { botToken, userToken, channelName, botName } = env;
 
   const botClient = new WebClient(botToken);
