@@ -1,7 +1,13 @@
 import { WebClient } from "@slack/web-api";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
-import { BotID, BotName, ChannelID, ChannelName } from "./types";
+import {
+  BotID,
+  BotName,
+  ChannelID,
+  ChannelName,
+  ChatSpeedAggregationResult,
+} from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
 import { buildMessage } from "./message";
@@ -115,7 +121,15 @@ const main = async (env: Env): Promise<void> => {
   );
 
   console.log("aggregate chat speed");
-  const results = await chatspeed.aggregateNumberOfPost(botClient, channels);
+  const numberOfPostPromises = channels
+    .map(async (channel) => slackUtils.getChannelId(await channel))
+    .map(async (id) => chatspeed.aggregateNumberOfPost(botClient, await id));
+  const numberOfPost = await Promise.all(numberOfPostPromises);
+  const results = numberOfPost
+    .filter((channelObject) => channelObject.numberOfPost !== 0)
+    .sort((a, b) => {
+      return b.numberOfPost - a.numberOfPost;
+    });
 
   console.log("make message");
   const text = buildMessage(results);
