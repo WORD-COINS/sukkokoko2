@@ -6,7 +6,6 @@ import {
   BotName,
   ChannelID,
   ChannelName,
-  ChatSpeedAggregationResult,
 } from "./types";
 import { validateNonNullableObject } from "./utils";
 import { Channel } from "@slack/web-api/dist/response/ConversationsListResponse";
