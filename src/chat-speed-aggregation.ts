@@ -4,7 +4,10 @@ import * as utils from "./slack-utils";
 import type { ChatSpeedAggregationResult, ChannelID } from "./types";
 
 // IDで指定されたchannelの24時間以内のpost数を集計する
-const getNumberOfDayPost = async (client: WebClient, channel: ChannelID) => {
+const getNumberOfDayPost = async (
+  client: WebClient,
+  channel: ChannelID
+): Promise<ChatSpeedAggregationResult> => {
   const yesterday = (() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
