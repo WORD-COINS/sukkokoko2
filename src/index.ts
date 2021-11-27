@@ -1,29 +1,8 @@
 import { WebClient } from "@slack/web-api";
+import { Env, getEnv } from "./env";
 import * as slackUtils from "./slack-utils";
 import * as chatspeed from "./chat-speed-aggregation";
-import { BotName, ChannelName } from "./types";
-import { validateNonNullableObject } from "./utils";
 import { buildMessage } from "./message";
-
-type Env = {
-  botToken: string;
-  userToken: string;
-  channelName: string;
-  botName: string;
-};
-
-const getEnv = (): Env => {
-  const botToken = process.env.SLACK_BOT_TOKEN;
-  const userToken = process.env.SLACK_USER_TOKEN;
-  const channelName = process.env.CHANNEL_NAME;
-  const botName = process.env.BOT_NAME;
-
-  const env = { botToken, userToken, channelName, botName };
-  if (!validateNonNullableObject(env)) {
-    throw new Error("Not found some environment variables.");
-  }
-  return env;
-};
 
 const main = async (env: Env): Promise<void> => {
   const { botToken, userToken, channelName, botName } = env;
@@ -33,12 +12,9 @@ const main = async (env: Env): Promise<void> => {
 
   const postTargetChannelId = await slackUtils.getChannelIdFromChannelName(
     botClient,
-    channelName as ChannelName
+    channelName
   );
-  const botId = await slackUtils.getBotIdFromBotName(
-    botClient,
-    botName as BotName
-  );
+  const botId = await slackUtils.getBotIdFromBotName(botClient, botName);
   const allChannels = await slackUtils.getAllChannels(botClient);
   const channelsWithoutArchived = allChannels.filter(
     (channel) => !channel.is_archived
