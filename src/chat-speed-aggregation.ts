@@ -9,7 +9,7 @@ export const aggregateNumberOfPost = async (
   const yesterday = (() => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(9); // UTC+9
+    yesterday.setUTCHours(9); // UTC+9
     yesterday.setMinutes(0);
     yesterday.setSeconds(0);
     yesterday.setMilliseconds(0);
