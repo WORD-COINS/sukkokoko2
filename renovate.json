@@ -4,7 +4,13 @@
   "rangeStrategy": "pin",
   "packageRules": [
     {
-      "matchUpdateTypes": ["major", "minor", "patch", "lockFileMaintenance", "pin"],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch",
+        "lockFileMaintenance",
+        "pin"
+      ],
       "automerge": true
     }
   ]
