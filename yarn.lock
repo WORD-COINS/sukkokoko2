@@ -77,7 +77,7 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@slack/bolt@^3.8.1":
+"@slack/bolt@3.8.1":
   version "3.8.1"
   resolved "https://registry.yarnpkg.com/@slack/bolt/-/bolt-3.8.1.tgz#c593e3bde38cc2a9a3c79f9a1b56247900628c1f"
   integrity sha512-V0u/39o8rflrQuVI5JoRCpTxXra7J1CxDzlv97xpETamH82nZotN2lOAiTKjWwsX1uX8B+dHb3th46qRIZgZyA==
