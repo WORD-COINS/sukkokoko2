@@ -1,9 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
+  "rangeStrategy": "pin",
   "packageRules": [
     {
-      "matchUpdateTypes": ["major", "minor", "patch", "lockFileMaintenance"],
+      "matchUpdateTypes": ["major", "minor", "patch", "lockFileMaintenance", "pin"],
       "automerge": true
     }
   ]
