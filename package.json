@@ -28,6 +28,6 @@
     "yarn": "1.22.19"
   },
   "dependencies": {
-    "@slack/bolt": "3.11.3"
+    "@slack/bolt": "3.12.0"
   }
 }
