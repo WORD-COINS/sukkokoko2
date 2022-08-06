@@ -11,7 +11,7 @@
         "lockFileMaintenance",
         "pin"
       ],
-      "platformAutomerge": true
+      "automerge": true
     }
   ]
 }
