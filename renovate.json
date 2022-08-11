@@ -12,6 +12,7 @@
         "pin"
       ],
       "automerge": true,
+      "automergeType": "pr",
       "platformAutomerge": true
     }
   ]
