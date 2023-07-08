@@ -6,7 +6,7 @@ import { BotID, BotName, ChannelID, ChannelName } from "./types";
 // channel情報をマップにして返す関数
 // IDがキーのマップとnameがキーのマップの2つ
 const getChannelInformation = async (
-  client: WebClient
+  client: WebClient,
 ): Promise<[Map<ChannelID, Channel>, Map<ChannelName, Channel>]> => {
   const channels = (await client.conversations.list()).channels;
 
@@ -34,7 +34,7 @@ const getChannelInformation = async (
 
 export const getChannelIdFromChannelName = async (
   client: WebClient,
-  channelName: ChannelName
+  channelName: ChannelName,
 ): Promise<ChannelID> => {
   const [, channelNameMap] = await getChannelInformation(client);
 
@@ -53,7 +53,7 @@ export const getChannelIdFromChannelName = async (
 // ボットの情報を取ってくる関数
 const getBotInfo = async (
   client: WebClient,
-  botName: string
+  botName: string,
 ): Promise<Member | undefined> => {
   const usersList = await client.users.list();
   if (usersList.members == null) {
@@ -78,7 +78,7 @@ export const getChannelId = (channel: Channel): ChannelID => {
 
 export const getBotIdFromBotName = async (
   botClient: WebClient,
-  botName: BotName
+  botName: BotName,
 ): Promise<BotID> => {
   const botInfo = await getBotInfo(botClient, botName);
   if (botInfo == null) {
@@ -94,7 +94,7 @@ export const getBotIdFromBotName = async (
 };
 
 export const getAllChannels = async (
-  botClient: WebClient
+  botClient: WebClient,
 ): Promise<Channel[]> => {
   const channels = (
     await botClient.conversations.list({
@@ -111,7 +111,7 @@ export const getAllChannels = async (
 const inviteChannel = async (
   client: WebClient,
   channel: ChannelID,
-  users: string
+  users: string,
 ): Promise<void> => {
   await client.conversations.invite({
     users,
@@ -123,7 +123,7 @@ const inviteChannel = async (
 export const joinToNotInChannels = async (
   client: WebClient,
   channel: Channel,
-  botId: BotID
+  botId: BotID,
 ): Promise<Channel> => {
   if (!channel.is_member) {
     console.log(`invite bot to ${channel.name}`);
