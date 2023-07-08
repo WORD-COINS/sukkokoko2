@@ -4,7 +4,7 @@ import type { ChannelID, ChatSpeedAggregationResult } from "./types";
 // IDで指定されたchannelの24時間以内のpost数を集計する
 export const aggregateNumberOfPost = async (
   client: WebClient,
-  channel: ChannelID
+  channel: ChannelID,
 ): Promise<ChatSpeedAggregationResult> => {
   const yesterday = (() => {
     const yesterday = new Date();

@@ -12,15 +12,15 @@ const main = async (env: Env): Promise<void> => {
 
   const postTargetChannelId = await slackUtils.getChannelIdFromChannelName(
     botClient,
-    channelName
+    channelName,
   );
   const botId = await slackUtils.getBotIdFromBotName(botClient, botName);
   const allChannels = await slackUtils.getAllChannels(botClient);
   const channelsWithoutArchived = allChannels.filter(
-    (channel) => !channel.is_archived
+    (channel) => !channel.is_archived,
   );
   const channels = channelsWithoutArchived.map((channel) =>
-    slackUtils.joinToNotInChannels(userClient, channel, botId)
+    slackUtils.joinToNotInChannels(userClient, channel, botId),
   );
 
   console.log("aggregate chat speed");
