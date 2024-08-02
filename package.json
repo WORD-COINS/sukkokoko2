@@ -21,13 +21,13 @@
     "eslint-config-prettier": "9.1.0",
     "prettier": "3.2.4",
     "ts-node": "10.9.2",
-    "typescript": "5.3.3"
+    "typescript": "5.5.4"
   },
   "volta": {
-    "node": "18.17.1",
+    "node": "20.16.0",
     "yarn": "1.22.22"
   },
   "dependencies": {
-    "@slack/bolt": "3.13.2"
+    "@slack/bolt": "3.19.0"
   }
 }
