@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.4.0
 
       - name: Setup Node.js
-        uses: volta-cli/action@v4
+        uses: volta-cli/action@v4.2.1
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
       - name: Setup reviewdog
-        uses: reviewdog/action-setup@v1
+        uses: reviewdog/action-setup@v1.5.0
         with:
           reviewdog_version: latest
 
